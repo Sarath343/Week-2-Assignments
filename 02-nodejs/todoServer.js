@@ -43,21 +43,47 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const port = 3000;
 const app = express();
-app.listen(port,()=>{
+app.listen(port, () => {
   console.log(`App is listening to port ${port}`)
 })
-app.get('/todos',getTodos)
-app.post('/todos',insertIntoTodo)
-var todoList=[];
-function insertIntoTodo(req,res){
-  console.log("postTodo insert ");
-  var input = req.body
-  todoList.push(input);
-  send.status(201).send(input);
+app.use(bodyParser.json());
+app.get('/todos', getTodos)
+app.post('/todos', insertIntoTodo)
+app.get('/todos/:id', getElementById)
+var todoList = [];
+var id = 0;
+function getElementById(req, res) {
+  let id = req.params.id;
+  let flag = false;
+  console.log("id param " + id)
+  if (todoList.length > 0 &&id>0 ) {
+    for (var i = 0; i < todoList.length; i++) {
+      let eachId = todoList[i]["ID"]
+      console.log(eachId);
+      if (eachId == id) {
+        flag = true;
+        break;
+      }
+    }
+  }
+  if (flag)
+    res.status(200).send(todoList[i])
+  else
+    res.status(404).send("Not Found")
 }
-function getTodos(req,res){
+function insertIntoTodo(req, res) {
+  console.log("post Todo insert ");
+  let input = req.body;
+  input["ID"] = ++id;
+  todoList.push(input);
+  var idObj = {
+    id: id
+  }
+  res.status(201).send(idObj);
+}
+function getTodos(req, res) {
   console.log("todos");
-  
+
   res.status(200).send(todoList);
 }
 app.use(bodyParser.json());
