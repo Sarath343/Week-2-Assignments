@@ -41,9 +41,25 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const port = 3000;
 const app = express();
-
+app.listen(port,()=>{
+  console.log(`App is listening to port ${port}`)
+})
+app.get('/todos',getTodos)
+app.post('/todos',insertIntoTodo)
+var todoList=[];
+function insertIntoTodo(req,res){
+  console.log("postTodo insert ");
+  var input = req.body
+  todoList.push(input);
+  send.status(201).send(input);
+}
+function getTodos(req,res){
+  console.log("todos");
+  
+  res.status(200).send(todoList);
+}
 app.use(bodyParser.json());
 
 module.exports = app;
