@@ -41,26 +41,38 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
-const port = 3000;
 const app = express();
-app.listen(port, () => {
-  console.log(`App is listening to port ${port}`)
-})
 app.use(bodyParser.json());
 app.get('/todos', getTodos)
 app.post('/todos', insertIntoTodo)
 app.get('/todos/:id', getElementById)
+app.put('/todos/:id', updateById)
+app.delete('/todos/:id', deleteById)
+app.use(middleware);
+function middleware(req,res,next){
+  res.status(404).send("Not Found")
+}
 var todoList = [];
 var id = 0;
-function getElementById(req, res) {
-  let id = req.params.id;
+function getTodos(req, res) {
+   res.status(200).send(todoList);
+}
+function insertIntoTodo(req, res) {
+   let input = req.body;
+   input["ID"] = ++id;
+   todoList.push(input);
+   var idObj = {
+     id: id
+   }
+   res.status(201).send(idObj);
+ }
+ function getElementById(req, res) {
+  let id = parseInt(req.params.id);
   let flag = false;
-  console.log("id param " + id)
-  if (todoList.length > 0 &&id>0 ) {
+  if (todoList.length > 0 && id > 0) {
     for (var i = 0; i < todoList.length; i++) {
       let eachId = todoList[i]["ID"]
-      console.log(eachId);
-      if (eachId == id) {
+      if (eachId === id) {
         flag = true;
         break;
       }
@@ -71,21 +83,46 @@ function getElementById(req, res) {
   else
     res.status(404).send("Not Found")
 }
-function insertIntoTodo(req, res) {
-  console.log("post Todo insert ");
+function updateById(req, res) {     // updates the attributes which are sent in the input only 
+  let id = parseInt(req.params.id);
   let input = req.body;
-  input["ID"] = ++id;
-  todoList.push(input);
-  var idObj = {
-    id: id
-  }
-  res.status(201).send(idObj);
+  let flag = false;
+  for (var i = 0; i < todoList.length; i++) {
+    if (todoList[i]["ID"] === id) {
+      if (input.title) {
+        todoList[i]["title"] = input.title;
+      }
+      if (input.title) {
+        todoList[i]["description"] = input.description;
+      }
+      if (input.title) {
+        todoList[i]["completed"] = input.completed;
+      }
+      flag = true;
+      break;
+    }
 }
-function getTodos(req, res) {
-  console.log("todos");
-
-  res.status(200).send(todoList);
+  if (flag)
+    res.status(200).send();
+  else
+    res.status(404).send("Not Found")
+}
+function deleteById(req, res) {
+  let id = parseInt(req.params.id);
+  let flag = false;
+  for (var i = 0; i < todoList.length; i++) {
+    if (todoList[i]["ID"] === id) {
+      todoList.splice(i, 1);
+      flag = true;
+      break;
+    }
+  }
+  if (flag)
+    res.status(200).send();
+  else
+    res.status(404).send("Not Found")
 }
 app.use(bodyParser.json());
-
+//app.listen(3000);
 module.exports = app;
+
