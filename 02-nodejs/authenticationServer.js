@@ -29,9 +29,77 @@
   Testing the server - run `npm run test-authenticationServer` command in terminal
  */
 
-const express = require("express")
+const express = require("express");
+const bodyParser=require("body-parser")
 const PORT = 3000;
 const app = express();
+app.use(bodyParser.json());
 // write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
+var userDetails = [];
+var id = 0;
+app.post('/login',(req,res)=>{
+  let inputUser = req.body;
+  let idx=userDetails.findIndex(t=>t.username == inputUser.username);
+  if(idx>-1){
+    if(userDetails[idx].password == inputUser.password){
+      let user = {
+        firstName:userDetails[idx].firstName,
+        lastname : userDetails[idx].lastName
+      }
+      res.status(200).send(user);
+      return;
+    }
+    res.status(401).send("Invalid Credentials")
+    return;
+  }
+  res.status(400).send("User doesnt exists")
+    return;
+  
 
-module.exports = app;
+})
+app.post('/signup', (req, res) => {
+  let inputUser = req.body
+  let idx=userDetails.findIndex(t=>t.username == inputUser.username);
+  console.log(idx);
+  if(idx<0){
+    inputUser["id"] = ++id;
+    userDetails.push(inputUser);
+    res.status(201).send("Successfully added the user ")
+  }
+  else{
+    res.status(400).send("User name already exists")
+  }
+})
+app.get("/data", (req, res) => {
+  var username = req.headers.username;
+  var password = req.headers.password;
+  let userFound = false;
+  for (var i = 0; i<users.length; i++) {
+    if (users[i].username === username && users[i].password === password) {
+        userFound = true;
+        break;
+    }
+  }
+
+  if (userFound) {
+    let usersToReturn = [];
+    for (let i = 0; i<users.length; i++) {
+        usersToReturn.push({
+            firstName: users[i].firstName,
+            lastName: users[i].lastName,
+            username: users[i].username
+        });
+    }
+    res.json({
+        users
+    });
+  } else {
+    res.sendStatus(401);
+  }
+});
+//username, password, firstName and lastName
+app.listen(PORT, () => {
+  console.log(`listening to port ${PORT}`);
+})
+//module.exports = app;
+
