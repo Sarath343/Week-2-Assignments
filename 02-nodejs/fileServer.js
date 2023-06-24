@@ -20,6 +20,46 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+const port = 3000;
+app.get('/files', (req, res) => {
+  console.log("from 1")
+  fs.readdir('./files', (err, files) => {
+    if (err) {
+      res.status(404).send("Not Found")
+    }
+    else {
+      let filesList = [];
+      files.forEach(file => {
+        filesList.push(file);
+        console.log("file " + file);
+      })
+      res.status(200).json(filesList)
+    }
+  })
+})
 
+app.get('/file/:filename', (req, res) => {
+  let fileName = req.params.filename;
+console.log("filename "+fileName);
+  console.log("from 2")
+  fs.readFile('./files/'+fileName, 'utf8',(err,data)=>{
+    console.log("inside fs  "+data)
+    if(err){
+      res.status(404).send("Not Found")
+    }
+    else{
+      console.log("data "+data);
+      res.status(200).send(data)
+    }
+  })
+})
 
-module.exports = app;
+app.use((req, res, next) => {
+  console.log("not matching any roots")
+  res.status(404).send("Not matching URL")
+})
+
+app.listen(port, () => {
+  console.log(`listening to port ${port} `);
+})
+//module.exports = app;
